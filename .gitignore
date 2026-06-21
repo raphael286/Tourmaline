@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Raphael.Tourmaline/bin
+/Raphael.Tourmaline/obj
+/Raphael.Tourmaline/Properties
+/Raphael.Tourmaline.App/bin
+/Raphael.Tourmaline.App/obj
