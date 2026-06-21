@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11911.148 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raphael.Tourmaline", "Raphael.Tourmaline\Raphael.Tourmaline.csproj", "{AB39E503-6804-482D-19B3-3CEDCDCB0CE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raphael.Tourmaline.App", "Raphael.Tourmaline.App\Raphael.Tourmaline.App.csproj", "{E728A358-EFC3-F1E7-E715-7B406C94296B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB39E503-6804-482D-19B3-3CEDCDCB0CE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB39E503-6804-482D-19B3-3CEDCDCB0CE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB39E503-6804-482D-19B3-3CEDCDCB0CE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB39E503-6804-482D-19B3-3CEDCDCB0CE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E728A358-EFC3-F1E7-E715-7B406C94296B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E728A358-EFC3-F1E7-E715-7B406C94296B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E728A358-EFC3-F1E7-E715-7B406C94296B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E728A358-EFC3-F1E7-E715-7B406C94296B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {660D6760-92A7-458B-91B9-10FFB5B5BE8B}
+	EndGlobalSection
+EndGlobal
