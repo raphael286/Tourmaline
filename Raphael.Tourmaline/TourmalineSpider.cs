@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
@@ -22,7 +23,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
 
     private Uri _uri = new Uri(ProcessUrl("/", new(ResolveInitialUrl(url))));
 
-    public async Task Start(Action<string, HttpStatusCode, int>? onFound = null)
+    public async Task Start(Action<string, HttpStatusCode, long, long, int>? onFound = null)
     {
         ConcurrentDictionary<string, bool> found = [];
         Channel<string> channel = Channel.CreateUnbounded<string>();
@@ -42,10 +43,11 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
         {
             tasks.Add(Task.Run(async () =>
             {
+                Stopwatch sw = new();
                 await foreach (string url in channel.Reader.ReadAllAsync())
                 {
                     Interlocked.Increment(ref inFlight);
-                    await Spider(url, channel, found, client, onFound);
+                    await Spider(url, channel, found, client, sw, onFound);
                     if (Interlocked.Decrement(ref inFlight) == 0)
                         channel.Writer.TryComplete();
                 }
@@ -61,11 +63,17 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
         Channel<string> channel,
         ConcurrentDictionary<string, bool> found,
         HttpClient client,
-        Action<string, HttpStatusCode, int>? onFound)
+        Stopwatch sw,
+        Action<string, HttpStatusCode, long, long, int>? onFound)
     {
         HttpResponseMessage res;
+        sw.Start();
         try { res = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead); }
         catch { return; }
+        sw.Stop();
+        long time = sw.ElapsedMilliseconds;
+        long size = res.Content.Headers.ContentLength ?? -1;
+        sw.Reset();
 
         string? contentType = res.Content.Headers.ContentType?.MediaType;
 
@@ -74,7 +82,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
             "application/javascript" or "text/javascript" or "application/x-javascript";
 
         if (res.StatusCode != HttpStatusCode.NotFound && GoodCheck(url) && BadCheck((url)))
-            onFound?.Invoke(url, res.StatusCode, found.Count);
+            onFound?.Invoke(url, res.StatusCode, time, size, found.Count);
 
         if (!isReadable) return;
 
@@ -86,6 +94,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
             if (ForceGoodRegex && !GoodCheck(u)) continue;
             if (ForceBadRegex && !BadCheck(u)) continue;
             if (!CheckDepth(u, MaxDepth)) continue;
+            if (Limit > 0 && found.Count >= Limit) continue;
             if (!found.TryAdd(u.TrimEnd('/'), true)) continue;
 
             await channel.Writer.WriteAsync(u);

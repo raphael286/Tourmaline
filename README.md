@@ -7,4 +7,3 @@ Quick &amp; powerful directory enumeration.
 - Output response times per URL
 - Crawl graph?
 - Subdomains
-- Limit

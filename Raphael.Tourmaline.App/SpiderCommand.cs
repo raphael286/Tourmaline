@@ -24,6 +24,9 @@ namespace Raphael.Tourmaline.App
             [CommandOption("-m|--max-depth <MAX-DEPTH>")]
             public int MaxDepth { get; set; } = -1;
 
+            [CommandOption("-l|--limit <LIMIT>")]
+            public int Limit { get; set; } = 500;
+
             [CommandOption("-g|--good <GOOD-REGEX>")]
             public string GoodRegex { get; set; } = string.Empty;
 
@@ -52,23 +55,25 @@ namespace Raphael.Tourmaline.App
             table.AddRow("Tasks", settings.Tasks.ToString());
             table.AddEmptyRow();
 
+            if (settings.MaxDepth != -1) table.AddRow("Max Depth", settings.MaxDepth.ToString());
+            if (settings.Limit != -1) table.AddRow("Limit", settings.Limit.ToString());
             if (!string.IsNullOrEmpty(settings.GoodRegex)) table.AddRow("Good Regex", settings.GoodRegex.Replace("[", "[[").Replace("]", "]]"));
             if (!string.IsNullOrEmpty(settings.BadRegex)) table.AddRow("Bad Regex", settings.BadRegex.Replace("[", "[[").Replace("]", "]]"));
             if (settings.ForceGoodRegex) table.AddRow("Force Good Regex", "true");
             if (settings.ForceBadRegex) table.AddRow("Force Bad Regex", "true");
-            if (settings.MaxDepth != -1) table.AddRow("Max Depth", settings.MaxDepth.ToString());
+            
 
             table.AddRow("Known Paths", known.Count == 0 ? "No known paths specified." : string.Join(", ", known));
             AnsiConsole.Write(table);
 
-            TourmalineSpider spider = new(settings.URL, [.. known], settings.Tasks, settings.MaxDepth);
+            TourmalineSpider spider = new(settings.URL, [.. known], settings.Tasks, settings.MaxDepth, settings.Limit);
             spider.GoodRegex = !string.IsNullOrEmpty(settings.GoodRegex) ? new(settings.GoodRegex) : null;
             spider.BadRegex = !string.IsNullOrEmpty(settings.BadRegex) ? new(settings.BadRegex) : null;
             spider.ForceGoodRegex = settings.ForceGoodRegex;
             spider.ForceBadRegex = settings.ForceBadRegex;
 
-            Action<string, HttpStatusCode, int> onFound = (url, code, count) => 
-                AnsiConsole.MarkupLine($"[[{code}]] [green]{url}[/] ({count} left)");
+            Action<string, HttpStatusCode, long, long, int> onFound = (url, code, time, size, count) =>
+                AnsiConsole.MarkupLine($"[[{code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url}[/] ({count} left)");
 
             await spider.Start(onFound);
             return 0;
