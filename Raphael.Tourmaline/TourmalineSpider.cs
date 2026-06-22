@@ -69,12 +69,14 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
 
         string? contentType = res.Content.Headers.ContentType?.MediaType;
 
-        bool isHtml = contentType is "text/html" or "application/xhtml+xml";
+        bool isReadable = contentType is
+            "text/html" or "application/xhtml+xml" or
+            "application/javascript" or "text/javascript" or "application/x-javascript";
 
         if (res.StatusCode != HttpStatusCode.NotFound && GoodCheck(url) && BadCheck((url)))
             onFound?.Invoke(url, res.StatusCode, found.Count);
 
-        if (!isHtml) return;
+        if (!isReadable) return;
 
         string content = await res.Content.ReadAsStringAsync();
 
