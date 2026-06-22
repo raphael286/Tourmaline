@@ -5,7 +5,7 @@ public static class Program
 {
     public async static Task Main()
     {
-        TourmalineSpider spider = new("http://books.toscrape.com");
+        TourmalineSpider spider = new("books.toscrape.com");
         await spider.Start((url, code, left) => Console.WriteLine($"[{code}] {url} ({left} left)"));
     }
 }

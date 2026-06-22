@@ -40,5 +40,11 @@ namespace Raphael.Tourmaline
             if (maxDepth == -1) return true;
             return path.Count(c => c == '/') <= maxDepth;
         }
+
+        internal static string ResolveInitialUrl(string baseUrl)
+        {
+            if (!baseUrl.StartsWith("http")) baseUrl = "http://" + baseUrl;
+            return baseUrl;
+        }
     }
 }

@@ -1,22 +1,28 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using static Raphael.Tourmaline.Helpers;
 
 namespace Raphael.Tourmaline;
 
-public class TourmalineSpider(string url, string[]? known = null)
+public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1)
 {
-    public string Url = ProcessUrl("/", new(url));
+    public string Url = ProcessUrl("/", new(ResolveInitialUrl(url)));
     public string[] Known { get; } = known ?? [];
 
-    public int Tasks { get; } = 16;
-    public int MaxDepth { get; } = -1;
-    public int Limit { get; } = -1;
+    public int Tasks { get; set; } = tasks;
+    public int MaxDepth { get; set; } = maxDepth;
+    public int Limit { get; set; } = limit;
 
-    private Uri _uri = new Uri(ProcessUrl("/", new(url)));
+    public Regex? GoodRegex { get; set; }
+    public Regex? BadRegex { get; set; }
+    public bool ForceGoodRegex { get; set; }
+    public bool ForceBadRegex { get; set; }
 
-    public async Task<List<string>> Start(Action<string, HttpStatusCode, int>? onFound = null)
+    private Uri _uri = new Uri(ProcessUrl("/", new(ResolveInitialUrl(url))));
+
+    public async Task Start(Action<string, HttpStatusCode, int>? onFound = null)
     {
         ConcurrentDictionary<string, bool> found = [];
         Channel<string> channel = Channel.CreateUnbounded<string>();
@@ -40,7 +46,6 @@ public class TourmalineSpider(string url, string[]? known = null)
                 {
                     Interlocked.Increment(ref inFlight);
                     await Spider(url, channel, found, client, onFound);
-
                     if (Interlocked.Decrement(ref inFlight) == 0)
                         channel.Writer.TryComplete();
                 }
@@ -49,7 +54,6 @@ public class TourmalineSpider(string url, string[]? known = null)
 
         await Task.WhenAll(tasks);
         client.Dispose();
-        return found.Keys.ToList();
     }
 
     private async Task Spider(
@@ -67,7 +71,7 @@ public class TourmalineSpider(string url, string[]? known = null)
 
         bool isHtml = contentType is "text/html" or "application/xhtml+xml";
 
-        if (res.StatusCode != HttpStatusCode.NotFound)
+        if (res.StatusCode != HttpStatusCode.NotFound && GoodCheck(url) && BadCheck((url)))
             onFound?.Invoke(url, res.StatusCode, found.Count);
 
         if (!isHtml) return;
@@ -77,10 +81,15 @@ public class TourmalineSpider(string url, string[]? known = null)
         foreach (string u in SpiderMatch(content, _uri))
         {
             if (!u.StartsWith(Url)) continue;
+            if (ForceGoodRegex && !GoodCheck(u)) continue;
+            if (ForceBadRegex && !BadCheck(u)) continue;
             if (!CheckDepth(u, MaxDepth)) continue;
             if (!found.TryAdd(u.TrimEnd('/'), true)) continue;
 
             await channel.Writer.WriteAsync(u);
         }
     }
+
+    private bool GoodCheck(string url) => GoodRegex is null || GoodRegex.IsMatch(url);
+    private bool BadCheck(string url) => BadRegex is null || !BadRegex.IsMatch(url);
 }
