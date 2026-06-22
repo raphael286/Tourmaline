@@ -1,11 +1,20 @@
-﻿
-using Raphael.Tourmaline;
+﻿using Spectre.Console.Cli;
 
-public static class Program
+namespace Raphael.Tourmaline.App
 {
-    public async static Task Main()
+    public static class Program
     {
-        TourmalineSpider spider = new("books.toscrape.com");
-        await spider.Start((url, code, left) => Console.WriteLine($"[{code}] {url} ({left} left)"));
+        public const string VERSION = "v0.0.0";
+
+        public async static Task<int> Main(string[] args)
+        {
+            CommandApp app = new();
+            app.Configure(c =>
+            {
+                c.AddCommand<SpiderCommand>("spider");
+            });
+
+            return await app.RunAsync(args);
+        }
     }
 }
