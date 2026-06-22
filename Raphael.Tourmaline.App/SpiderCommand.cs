@@ -2,8 +2,10 @@
 using Spectre.Console.Cli;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Net;
 using System.Text;
+using System.Timers;
 
 namespace Raphael.Tourmaline.App
 {
@@ -38,6 +40,9 @@ namespace Raphael.Tourmaline.App
 
             [CommandOption("--force-bad")]
             public bool ForceBadRegex { get; set; } = false;
+
+            [CommandOption("-o|--outfile <OUTFILE>")]
+            public string Outfile { get; set; } = string.Empty;
         }
 
         protected async override Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
@@ -61,7 +66,7 @@ namespace Raphael.Tourmaline.App
             if (!string.IsNullOrEmpty(settings.BadRegex)) table.AddRow("Bad Regex", settings.BadRegex.Replace("[", "[[").Replace("]", "]]"));
             if (settings.ForceGoodRegex) table.AddRow("Force Good Regex", "true");
             if (settings.ForceBadRegex) table.AddRow("Force Bad Regex", "true");
-            
+            if (!string.IsNullOrEmpty(settings.Outfile)) table.AddRow("Outfile", settings.Outfile);
 
             table.AddRow("Known Paths", known.Count == 0 ? "No known paths specified." : string.Join(", ", known));
             AnsiConsole.Write(table);
@@ -72,10 +77,22 @@ namespace Raphael.Tourmaline.App
             spider.ForceGoodRegex = settings.ForceGoodRegex;
             spider.ForceBadRegex = settings.ForceBadRegex;
 
+            List<(string, HttpStatusCode, long, long)> found = [];
             Action<string, HttpStatusCode, long, long, int> onFound = (url, code, time, size, count) =>
+            {
                 AnsiConsole.MarkupLine($"[[{code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url}[/] ({count} left)");
+                found.Add((url, code, time, size));
+            };
 
             await spider.Start(onFound);
+
+            if (!string.IsNullOrEmpty(settings.Outfile))
+            {
+                // url, code, time, size
+                List<string> formatted = found.Select((t) => $"{t.Item1} {t.Item2} {t.Item3} {t.Item4}").ToList();
+                File.WriteAllLines(settings.Outfile, formatted);
+            }
+
             return 0;
         }
     }

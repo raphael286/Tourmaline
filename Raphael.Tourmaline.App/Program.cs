@@ -12,6 +12,7 @@ namespace Raphael.Tourmaline.App
             app.Configure(c =>
             {
                 c.AddCommand<SpiderCommand>("spider");
+                c.AddCommand<HandlerCommand>("handler");
             });
 
             return await app.RunAsync(args);
