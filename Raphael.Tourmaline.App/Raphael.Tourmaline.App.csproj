@@ -5,15 +5,36 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <StartupObject>Raphael.Tourmaline.App.Program</StartupObject>
+    <PackAsTool>True</PackAsTool>
+    <PackageId>Raphael.Tourmaline.App</PackageId>
+    <Title>Tourmaline</Title>
+    <Version>1.0.1</Version>
+    <Authors>Raphael</Authors>
+    <Description>A command line interface for the directory enumeration library Tourmaline.</Description>
+    <PackageProjectUrl>https://github.com/raphael286/Tourmaline</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/raphael286/Tourmaline.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ToolCommandName>tourmaline</ToolCommandName>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Spectre.Console" Version="0.57.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Raphael.Tourmaline\Raphael.Tourmaline.csproj" />
+    <PackageReference Include="Raphael.Tourmaline" Version="1.0.0" />
+    <PackageReference Include="Spectre.Console" Version="0.57.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
   </ItemGroup>
 
 </Project>
