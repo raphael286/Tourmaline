@@ -29,6 +29,9 @@ namespace Raphael.Tourmaline.App
             [CommandOption("-l|--limit <LIMIT>")]
             public int Limit { get; set; } = 2000;
 
+            [CommandOption("-d|--delay")]
+            public int Delay { get; set; } = -1;
+
             [CommandOption("-g|--good <GOOD-REGEX>")]
             public string GoodRegex { get; set; } = string.Empty;
 
@@ -62,6 +65,7 @@ namespace Raphael.Tourmaline.App
 
             if (settings.MaxDepth != -1) table.AddRow("Max Depth", settings.MaxDepth.ToString());
             if (settings.Limit != -1) table.AddRow("Limit", settings.Limit.ToString());
+            if (settings.Delay != -1) table.AddRow("Delay", settings.Delay.ToString());
             if (!string.IsNullOrEmpty(settings.GoodRegex)) table.AddRow("Good Regex", settings.GoodRegex.Replace("[", "[[").Replace("]", "]]"));
             if (!string.IsNullOrEmpty(settings.BadRegex)) table.AddRow("Bad Regex", settings.BadRegex.Replace("[", "[[").Replace("]", "]]"));
             if (settings.ForceGoodRegex) table.AddRow("Force Good Regex", "true");
@@ -71,7 +75,7 @@ namespace Raphael.Tourmaline.App
             table.AddRow("Known Paths", known.Count == 0 ? "No known paths specified." : string.Join(", ", known));
             AnsiConsole.Write(table);
 
-            TourmalineSpider spider = new(settings.URL, [.. known], settings.Tasks, settings.MaxDepth, settings.Limit);
+            TourmalineSpider spider = new(settings.URL, [.. known], settings.Tasks, settings.MaxDepth, settings.Limit, settings.Delay);
             spider.GoodRegex = !string.IsNullOrEmpty(settings.GoodRegex) ? new(settings.GoodRegex) : null;
             spider.BadRegex = !string.IsNullOrEmpty(settings.BadRegex) ? new(settings.BadRegex) : null;
             spider.ForceGoodRegex = settings.ForceGoodRegex;

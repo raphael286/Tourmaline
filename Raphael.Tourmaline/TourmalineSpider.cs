@@ -7,7 +7,7 @@ using static Raphael.Tourmaline.Helpers;
 
 namespace Raphael.Tourmaline;
 
-public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1)
+public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1, int delay = -1)
 {
     public string Url = ProcessUrl("/", new(ResolveInitialUrl(url)));
     public string[] Known { get; } = known ?? [];
@@ -15,6 +15,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
     public int Tasks { get; set; } = tasks;
     public int MaxDepth { get; set; } = maxDepth;
     public int Limit { get; set; } = limit;
+    public int Delay { get; set; } = delay;
 
     public Regex? GoodRegex { get; set; }
     public Regex? BadRegex { get; set; }
@@ -22,6 +23,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
     public bool ForceBadRegex { get; set; }
 
     private Uri _uri = new Uri(ProcessUrl("/", new(ResolveInitialUrl(url))));
+    private SemaphoreSlim? _rateLimiter;
 
     public async Task Start(Action<string, HttpStatusCode, long, long, int>? onFound = null)
     {
@@ -36,6 +38,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
         }
 
         int inFlight = 0;
+        _rateLimiter = Delay > 0 ? new SemaphoreSlim(1, 1) : null;
 
         List<Task> tasks = [];
 
@@ -56,6 +59,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
 
         await Task.WhenAll(tasks);
         client.Dispose();
+        _rateLimiter?.Dispose();
     }
 
     private async Task Spider(
@@ -66,6 +70,12 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
         Stopwatch sw,
         Action<string, HttpStatusCode, long, long, int>? onFound)
     {
+        if (_rateLimiter is not null)
+        {
+            await _rateLimiter.WaitAsync();
+            _ = Task.Delay(Delay).ContinueWith(_ => _rateLimiter.Release());
+        }
+
         HttpResponseMessage res;
         sw.Start();
         try { res = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead); }
