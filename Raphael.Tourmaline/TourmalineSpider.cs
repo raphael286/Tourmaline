@@ -92,7 +92,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
             "application/javascript" or "text/javascript" or "application/x-javascript";
 
         if (res.StatusCode != HttpStatusCode.NotFound && GoodCheck(url) && BadCheck((url)))
-            onFound?.Invoke(url, res.StatusCode, time, size, found.Count);
+            onFound?.Invoke(url, res.StatusCode, time, size, channel.Reader.Count);
 
         if (!isReadable) return;
 
@@ -105,7 +105,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
             if (ForceBadRegex && !BadCheck(u)) continue;
             if (!CheckDepth(u, MaxDepth)) continue;
             if (Limit > 0 && found.Count >= Limit) continue;
-            if (!found.TryAdd(u.TrimEnd('/'), true)) continue;
+            if (!found.TryAdd(u, true)) continue;
 
             await channel.Writer.WriteAsync(u);
         }

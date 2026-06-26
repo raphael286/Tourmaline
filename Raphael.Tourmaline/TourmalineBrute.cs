@@ -9,7 +9,7 @@ namespace Raphael.Tourmaline;
 
 public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32, int delay = -1)
 {
-    public string Url = ProcessUrl("/", new(ResolveInitialUrl(url)));
+    public string Url = ResolveInitialUrl(url);
     public string[] Paths { get; } = paths ?? [];
 
     public int Tasks { get; set; } = tasks;
@@ -17,13 +17,13 @@ public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32,
 
     private SemaphoreSlim? _rateLimiter;
 
-    public async Task Start(Action<string, HttpStatusCode, long, long>? onFound = null)
+    public async Task Start(Action<string, HttpStatusCode, long, long, int>? onFound = null)
     {
         Channel<string> channel = Channel.CreateUnbounded<string>();
         HttpClient client = new();
 
         foreach (string path in Paths)
-            await channel.Writer.WriteAsync(ProcessUrl(path, new(Url)));
+            await channel.Writer.WriteAsync(ProcessUrl(path, new(Url)) + '/');
 
         int inFlight = 0;
         _rateLimiter = Delay > 0 ? new SemaphoreSlim(1, 1) : null;
@@ -55,7 +55,7 @@ public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32,
         Channel<string> channel,
         HttpClient client,
         Stopwatch sw,
-        Action<string, HttpStatusCode, long, long>? onFound)
+        Action<string, HttpStatusCode, long, long, int>? onFound)
     {
         if (_rateLimiter is not null)
         {
@@ -73,6 +73,6 @@ public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32,
         sw.Reset();
 
         if (res.StatusCode != HttpStatusCode.NotFound)
-            onFound?.Invoke(url, res.StatusCode, time, size);
+            onFound?.Invoke(url, res.StatusCode, time, size, channel.Reader.Count);
     }
 }

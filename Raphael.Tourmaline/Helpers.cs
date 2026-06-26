@@ -44,7 +44,7 @@ namespace Raphael.Tourmaline
         internal static string ResolveInitialUrl(string baseUrl)
         {
             if (!baseUrl.StartsWith("http")) baseUrl = "http://" + baseUrl;
-            return baseUrl;
+            return baseUrl.TrimEnd('/');
         }
     }
 }

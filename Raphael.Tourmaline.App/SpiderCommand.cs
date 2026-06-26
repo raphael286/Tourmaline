@@ -58,7 +58,7 @@ namespace Raphael.Tourmaline.App
             table.AddColumns("[green]Tourmaline[/]", Program.VERSION);
             table.Expand();
 
-            table.AddRow("Mode", "Spider");
+            table.AddRow("Mode", "[blue]Spider[/]");
             table.AddRow("URL", settings.URL);
             table.AddRow("Tasks", settings.Tasks.ToString());
             table.AddEmptyRow();
@@ -84,7 +84,7 @@ namespace Raphael.Tourmaline.App
             List<(string, HttpStatusCode, long, long)> found = [];
             Action<string, HttpStatusCode, long, long, int> onFound = (url, code, time, size, count) =>
             {
-                AnsiConsole.MarkupLine($"[[{(int)code} {code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url}[/] ({count} left)");
+                AnsiConsole.MarkupLine($"[[{(int)code} {code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url.Replace("[", "[[").Replace("]", "]]")}[/] ({count} left)");
                 found.Add((url, code, time, size));
             };
 
