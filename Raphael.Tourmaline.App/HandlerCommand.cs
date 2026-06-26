@@ -39,7 +39,7 @@ namespace Raphael.Tourmaline.App
             public long MaxTime { get; set; } = long.MaxValue;
 
             [CommandOption("--code <CODE>")]
-            public string Code { get; set; } = string.Empty;
+            public int Code { get; set; } = -1;
 
             [CommandOption("-r|--regex <REGEX>")]
             public string Regex { get; set; } = string.Empty;
@@ -68,7 +68,7 @@ namespace Raphael.Tourmaline.App
             if (settings.MaxSize != long.MaxValue) table.AddRow("Max Size", settings.MaxSize.ToString());
             if (settings.MinTime != 0) table.AddRow("Min Time", settings.MinTime.ToString());
             if (settings.MaxTime != long.MaxValue) table.AddRow("Max Time", settings.MaxTime.ToString());
-            if (!string.IsNullOrEmpty(settings.Code)) table.AddRow("Code", settings.Code);
+            if (settings.Code != -1) table.AddRow("Code", settings.Code.ToString());
             if (!string.IsNullOrEmpty(settings.Regex)) table.AddRow("Regex", settings.Regex);
             if (settings.Csv) table.AddRow("Output", "CSV");
             if (settings.Strip) table.AddRow("Strip", "Enabled");
@@ -76,11 +76,11 @@ namespace Raphael.Tourmaline.App
             AnsiConsole.Write(table);
 
             string[] lines = File.ReadAllLines(settings.Path);
-            List<(string, string, long, long)> data = [];
+            List<(string, int, long, long)> data = [];
             foreach (string line in lines)
             {
                 string[] parts = line.Split(' ');
-                data.Add((parts[0], parts[1], long.Parse(parts[2]), long.Parse(parts[3])));
+                data.Add((parts[0], int.Parse(parts[1]), long.Parse(parts[2]), long.Parse(parts[3])));
             }
 
             if (settings.SortLength) data = [.. data.OrderByDescending(t => t.Item4)];
@@ -92,7 +92,7 @@ namespace Raphael.Tourmaline.App
             data = [.. data.Where(t => t.Item4 <= settings.MaxSize)];
             data = [.. data.Where(t => t.Item3 >= settings.MinTime)];
             data = [.. data.Where(t => t.Item3 <= settings.MaxTime)];
-            if (!string.IsNullOrEmpty(settings.Code)) data = [.. data.Where(t => t.Item2 == settings.Code)];
+            if (settings.Code != -1) data = [.. data.Where(t => t.Item2 == settings.Code)];
 
             Regex regex = new(settings.Regex);
             if (!string.IsNullOrEmpty(settings.Regex)) data = [.. data.Where(t => regex.IsMatch(t.Item1))];

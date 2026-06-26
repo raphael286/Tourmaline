@@ -27,7 +27,7 @@ namespace Raphael.Tourmaline.App
             public int MaxDepth { get; set; } = -1;
 
             [CommandOption("-l|--limit <LIMIT>")]
-            public int Limit { get; set; } = 500;
+            public int Limit { get; set; } = 2000;
 
             [CommandOption("-g|--good <GOOD-REGEX>")]
             public string GoodRegex { get; set; } = string.Empty;
@@ -80,7 +80,7 @@ namespace Raphael.Tourmaline.App
             List<(string, HttpStatusCode, long, long)> found = [];
             Action<string, HttpStatusCode, long, long, int> onFound = (url, code, time, size, count) =>
             {
-                AnsiConsole.MarkupLine($"[[{code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url}[/] ({count} left)");
+                AnsiConsole.MarkupLine($"[[{(int)code} {code} - {time}ms, {size / 1024.0:F1}kb]] [green]{url}[/] ({count} left)");
                 found.Add((url, code, time, size));
             };
 
@@ -89,7 +89,7 @@ namespace Raphael.Tourmaline.App
             if (!string.IsNullOrEmpty(settings.Outfile))
             {
                 // url, code, time, size
-                List<string> formatted = found.Select((t) => $"{t.Item1} {t.Item2} {t.Item3} {t.Item4}").ToList();
+                List<string> formatted = found.Select((t) => $"{t.Item1} {(int)t.Item2} {t.Item3} {t.Item4}").ToList();
                 File.WriteAllLines(settings.Outfile, formatted);
             }
 
