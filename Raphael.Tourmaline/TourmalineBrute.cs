@@ -23,7 +23,7 @@ public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32,
         HttpClient client = new();
 
         foreach (string path in Paths)
-            await channel.Writer.WriteAsync(ProcessUrl(path, new(Url)) + '/');
+            await channel.Writer.WriteAsync(ProcessUrl(path, new(Url)));
 
         int inFlight = 0;
         _rateLimiter = Delay > 0 ? new SemaphoreSlim(1, 1) : null;

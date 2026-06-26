@@ -9,7 +9,7 @@ namespace Raphael.Tourmaline;
 
 public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1, int delay = -1)
 {
-    public string Url = ProcessUrl("/", new(ResolveInitialUrl(url)));
+    public string Url = ResolveInitialUrl(url);
     public string[] Known { get; } = known ?? [];
 
     public int Tasks { get; set; } = tasks;
@@ -22,7 +22,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
     public bool ForceGoodRegex { get; set; }
     public bool ForceBadRegex { get; set; }
 
-    private Uri _uri = new Uri(ProcessUrl("/", new(ResolveInitialUrl(url))));
+    private Uri _uri = new Uri(ResolveInitialUrl(url));
     private SemaphoreSlim? _rateLimiter;
 
     public async Task Start(Action<string, HttpStatusCode, long, long, int>? onFound = null)
