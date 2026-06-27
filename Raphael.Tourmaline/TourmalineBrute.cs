@@ -7,6 +7,13 @@ using static Raphael.Tourmaline.Helpers;
 
 namespace Raphael.Tourmaline;
 
+/// <summary>
+/// A brute force directory enumerator.
+/// </summary>
+/// <param name="url">The base URL of the site.</param>
+/// <param name="paths">The set of paths to check relative to <c>url</c>.</param>
+/// <param name="tasks">The number of concurrent tasks to run in the brute.</param>
+/// <param name="delay">The delay between requests.</param>
 public class TourmalineBrute(string url, string[]? paths = null, int tasks = 32, int delay = -1)
 {
     /// <summary>

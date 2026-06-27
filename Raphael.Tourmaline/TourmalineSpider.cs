@@ -7,6 +7,15 @@ using static Raphael.Tourmaline.Helpers;
 
 namespace Raphael.Tourmaline;
 
+/// <summary>
+/// A web spider directory enumerator.
+/// </summary>
+/// <param name="url">The base URL of the site.</param>
+/// <param name="known">The set of paths to check alongside <c>url</c>.</param>
+/// <param name="tasks">The number of concurrent tasks to run in the spider.</param>
+/// <param name="maxDepth">The maximum amount of URL nesting allowed by the spider.</param>
+/// <param name="limit">The maximum number of pages to check.</param>
+/// <param name="delay">The delay between requests.</param>
 public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1, int delay = -1)
 {
     /// <summary>
@@ -25,7 +34,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
     public int Tasks { get; set; } = tasks;
 
     /// <summary>
-    /// The maximum number of nested pages allowed by the spider.
+    /// The maximum amount of URL nesting allowed by the spider.
     /// <c>-1</c> indicates that the spider should ignore this restriction.
     /// </summary>
     public int MaxDepth { get; set; } = maxDepth;
