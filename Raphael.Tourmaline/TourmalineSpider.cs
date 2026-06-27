@@ -9,23 +9,70 @@ namespace Raphael.Tourmaline;
 
 public class TourmalineSpider(string url, string[]? known = null, int tasks = 32, int maxDepth = -1, int limit = -1, int delay = -1)
 {
-    public string Url = ResolveInitialUrl(url);
+    /// <summary>
+    /// The base URL of the site.
+    /// </summary>
+    public string Url { get; set; } = ResolveInitialUrl(url);
+
+    /// <summary>
+    /// The set of paths to check alongside <c>spider.Url</c>.
+    /// </summary>
     public string[] Known { get; } = known ?? [];
 
+    /// <summary>
+    /// The number of concurrent tasks to run in the spider.
+    /// </summary>
     public int Tasks { get; set; } = tasks;
+
+    /// <summary>
+    /// The maximum number of nested pages allowed by the spider.
+    /// <c>-1</c> indicates that the spider should ignore this restriction.
+    /// </summary>
     public int MaxDepth { get; set; } = maxDepth;
+
+    /// <summary>
+    /// The maximum number of pages to check.
+    /// <c>-1</c> indicates that the spider should ignore this restriction.
+    /// </summary>
     public int Limit { get; set; } = limit;
+
+    /// <summary>
+    /// The delay between requests.
+    /// <c>-1</c> indicates that the spider should ignore this restriction.
+    /// </summary>
     public int Delay { get; set; } = delay;
 
+    /// <summary>
+    /// The regex all URLs must pass to be added to the output.
+    /// <c>null</c> indicates that the spider should ignore this restriction.
+    /// </summary>
     public Regex? GoodRegex { get; set; }
+
+    /// <summary>
+    /// The regex all URLs must fail to be added to the output.
+    /// <c>null</c> indicates that the spider should ignore this restriction.
+    /// </summary>
     public Regex? BadRegex { get; set; }
+
+    /// <summary>
+    /// If <c>true</c>, passing URLs will be added to the queue and failing URLs will not.
+    /// This applies <c>GoodRegex</c> to the queue as well as the output.
+    /// </summary>
     public bool ForceGoodRegex { get; set; }
+
+    /// <summary>
+    /// If <c>true</c>, failing URLs will be added to the queue and passing URLs will not.
+    /// This applies <c>BadRegex</c> to the queue as well as the output.
+    /// </summary>
     public bool ForceBadRegex { get; set; }
 
     private Uri _uri = new Uri(ResolveInitialUrl(url));
     private SemaphoreSlim? _rateLimiter;
 
-    public async Task Start(Action<string, HttpStatusCode, long, long, int>? onFound = null)
+    /// <summary>
+    /// Start's the spider's search, calling <c>onFound</c> with <c>(url, statusCode, responseTimeMS, pageSizeBytes, queueCount)</c> on each page found.
+    /// </summary>
+    public async Task Start(Action<string, HttpStatusCode, long, long, int> onFound)
     {
         ConcurrentDictionary<string, bool> found = [];
         Channel<string> channel = Channel.CreateUnbounded<string>();
@@ -68,7 +115,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
         ConcurrentDictionary<string, bool> found,
         HttpClient client,
         Stopwatch sw,
-        Action<string, HttpStatusCode, long, long, int>? onFound)
+        Action<string, HttpStatusCode, long, long, int> onFound)
     {
         if (_rateLimiter is not null)
         {
@@ -92,7 +139,7 @@ public class TourmalineSpider(string url, string[]? known = null, int tasks = 32
             "application/javascript" or "text/javascript" or "application/x-javascript";
 
         if (res.StatusCode != HttpStatusCode.NotFound && GoodCheck(url) && BadCheck((url)))
-            onFound?.Invoke(url, res.StatusCode, time, size, channel.Reader.Count);
+            onFound.Invoke(url, res.StatusCode, time, size, channel.Reader.Count);
 
         if (!isReadable) return;
 

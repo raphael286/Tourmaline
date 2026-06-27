@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Raphael.Tourmaline</PackageId>
     <Title>Tourmaline</Title>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Raphael</Authors>
     <Company />
     <Description>Quick and powerful directory enumeration.</Description>
@@ -16,6 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
